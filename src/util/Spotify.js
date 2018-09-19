@@ -1,7 +1,6 @@
-let userToken = '';
+let userToken;
 const redirectURI = 'http://localhost:3000/';
 const clientID = 'ee7e6fc116014a429124843dd1efad98';
-const url = 'https://api.spotify.com/v1/search?type=track&q=';
 
 const Spotify = {
   getAccessToken() {
@@ -11,6 +10,7 @@ const Spotify = {
 
     const accessToken = window.location.href.match(/access_token=([^&]*)/);
     const expirationTime = window.location.href.match(/expires_in=([^&]*)/);
+
     if (accessToken && expirationTime) {
       userToken = accessToken[1];
       const expiresIn = Number(expirationTime[1]);
@@ -22,68 +22,105 @@ const Spotify = {
     }
   },
 
-  async search(term) {
-    const accessToken = this.getAccessToken();
-    const endPoint = `${url}${term}`;
-    const header = {Authorization: `Bearer ${accessToken}`}
-    try {
-      const response = await fetch(endPoint, {headers: header});
-      if(response.ok){
-        const jsonResponse = await response.json();
-        // console.log(jsonResponse);
-        return jsonResponse.tracks.items.map(track => ({
+  // async search(term) {
+  //   const url = 'https://api.spotify.com/v1/search?type=track&q=';
+  //   let accessToken = Spotify.getAccessToken();
+  //   let endPoint = `${url}${term}`;
+  //   let header = {Authorization: `Bearer ${accessToken}`}
+  //   try {
+  //     const response = await fetch(endPoint, {headers: header});
+  //     if(response.ok){
+  //       const jsonResponse = await response.json();
+  //       if (jsonResponse.tracks.items) {
+  //         return jsonResponse.tracks.items.map(track => ({
+  //           name: track.name,
+  //           artist: track.artists[0].name,
+  //           album: track.album.name,
+  //           id: track.id,
+  //           uri: track.uri
+  //         }));
+  //       } else {
+  //         return [];
+  //       }
+  //     } else {
+  //       throw new Error("Search request failed!");
+  //     }
+  //   } catch (error) {
+  //     console.log(error.message);
+  //   }
+  // },
+
+  //  Below code works as well
+   search(term) {
+    const url = 'https://api.spotify.com/v1/search?type=track&q=';
+    let accessToken = Spotify.getAccessToken();
+    let endPoint = `${url}${term}`;
+    let header = {Authorization: `Bearer ${accessToken}`}
+
+    return (fetch(endPoint, {headers:header})).then(response => {
+      if(response.ok) {
+        return response.json();
+      }
+    }).then(jsonResponse =>{
+      if(jsonResponse.tracks.items) {
+        return jsonResponse.tracks.items.map(track =>({
           name: track.name,
           artist: track.artists[0].name,
           album: track.album.name,
           id: track.id,
-          uri: track.uri
+          uri: track.uri          
         }));
-        // {name: "Dahai2", artist: "ZYS21", album: "Dahai2", id: "11"},
+      } else {
+        return [];
       }
-    } catch (error) {
-      console.log(error);
-    }
-
+    })
   },
 
   async savePlaylist(palylistName, trackURIs) {
-    const accessToken = this.getAccessToken();
-    const header = {'Authorization': 'Bearer ' + accessToken};
-    let userID = '';
-    let PlaylistID = '';
+    const accessToken = Spotify.getAccessToken();
+    let header = {Authorization: `Bearer ${accessToken}`}
+    // let userID;
+    let playlistID;
+    let userhref;
     const endPointGetID = 'https://api.spotify.com/v1/me';
 
     try { 
-      const getID = await fetch(endPointGetID, {header: header});
+      const getID = await fetch(endPointGetID, {headers: header});
       if (getID.ok) {
-        const jsonGetID = getID.json();
-        userID = jsonGetID.id;
+        const jsonGetID = await getID.json();
+        // userID = jsonGetID.id;
+        userhref = jsonGetID.href;
+      } else {
+        throw new Error("User ID request failed!");
       }
-      const endPointUpdatePlaylistName = `https://api.spotify.com/v1/users/${userID}/playlists`
-      const updatePlaylistName = await fetch(endPointUpdatePlaylistName, {
+      const endPointUpdatePlaylistName = `${userhref}/playlists`
+      const updatePlaylistName = await fetch(endPointUpdatePlaylistName, {  
         method: 'POST',
-        header: header,
+        headers: header,
         body: JSON.stringify({name: palylistName})
       });
       if (updatePlaylistName.ok) {
-        PlaylistID = await updatePlaylistName.json().id;
+        const jsonUpdatePlaylistName = await updatePlaylistName.json();
+        playlistID = jsonUpdatePlaylistName.id;
+      } else {
+        throw new Error("Update playlist name failed!");
       }
-      const endPointUpdatePlaylist = `https://api.spotify.com/v1/playlists/${PlaylistID}/tracks`;
+      const endPointUpdatePlaylist = `${userhref}/playlists/${playlistID}/tracks`;
       const updatePlylist = await fetch(endPointUpdatePlaylist, {
         method: 'POST',
-        header: header,
+        headers: header,
         body: JSON.stringify({uris: trackURIs})
       });
       if (updatePlylist.ok) {
-        return await updatePlylist.json().id;
+        const jsonUpdatePlaylist = await updatePlylist.json();
+        return jsonUpdatePlaylist.id;
+      } else {
+        throw new Error("Update track's URIs failed!");
       }
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
     }
-
   }
-
-
 }
 
 export default Spotify;

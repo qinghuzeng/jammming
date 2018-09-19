@@ -10,20 +10,15 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      playlistName: "Dahai",
-      playlistTracks: [
-        {name: "Dahai", artist: "ZYS1", album: "Dahai", id: "1"},
-        {name: "Dahai", artist: "ZYS2", album: "Dahai", id: "2"},
-        {name: "Dahai", artist: "ZYS3", album: "Dahai", id: "3"},
-        {name: "Dahai", artist: "ZYS4", album: "Dahai", id: "4"}
-      ],
-      searchResults:[
-        {name: "Dahai2", artist: "ZYS21", album: "Dahai2", id: "11"},
-        {name: "Dahai2", artist: "ZYS22", album: "Dahai2", id: "22"},
-        {name: "Dahai2", artist: "ZYS23", album: "Dahai2", id: "32"},
-        {name: "Dahai2", artist: "ZYS24", album: "Dahai2", id: "41"}
-      ]
-      // searchResults: []
+      playlistName: 'New Playlist',
+      playlistTracks: [],
+      // searchResults:[
+      //   {name: "Dahai2", artist: "ZYS21", album: "Dahai2", id: "11"},
+      //   {name: "Dahai2", artist: "ZYS22", album: "Dahai2", id: "22"},
+      //   {name: "Dahai2", artist: "ZYS23", album: "Dahai2", id: "32"},
+      //   {name: "Dahai2", artist: "ZYS24", album: "Dahai2", id: "41"}
+      // ]
+      searchResults: []
     };
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -67,6 +62,10 @@ class App extends React.Component {
     const trackURIs = this.state.playlistTracks.map(track =>{
       return track.uri;
     });
+    console.log(trackURIs);
+    if (this.state.playlistName === '') {
+      return;
+    }
     Spotify.savePlaylist(this.state.playlistName, trackURIs);
     this.setState({
       playlistName: 'New Playlist',
@@ -75,15 +74,15 @@ class App extends React.Component {
   }
 
   search(term) {
-    // console.log(term);
     if(term === '') {
       return;
     }
-    const searchResults = Spotify.search(term);
-    this.setState({
-      searchResults: searchResults
+    Spotify.search(term).then(searchResults => {
+      console.log(searchResults);
+      this.setState({
+        searchResults: searchResults
+      })
     })
-    console.log(searchResults);
   }
 
   render() {
