@@ -1,10 +1,10 @@
 let userToken;
-// const redirectURI = 'http://localhost:3000/';
-const redirectURI = 'http://jammming_qinghu.surge.sh';
+const redirectURI = 'http://localhost:3000/';
+// const redirectURI = 'http://jammming_qinghu.surge.sh';
 const clientID = 'ee7e6fc116014a429124843dd1efad98';
 
 const Spotify = {
-  getAccessToken() {
+  async getAccessToken() {
     if(userToken) {
       return userToken;
     }
@@ -23,59 +23,59 @@ const Spotify = {
     }
   },
 
-  // async search(term) {
+  async search(term) {
+    const url = 'https://api.spotify.com/v1/search?type=track&q=';
+    let accessToken = await this.getAccessToken();
+    let endPoint = `${url}${term}`;
+    let header = {Authorization: `Bearer ${accessToken}`}
+    try {
+      const response = await fetch(endPoint, {headers: header});
+      if(response.ok){
+        const jsonResponse = await response.json();
+        if (jsonResponse.tracks.items) {
+          return jsonResponse.tracks.items.map(track => ({
+            name: track.name,
+            artist: track.artists[0].name,
+            album: track.album.name,
+            id: track.id,
+            uri: track.uri
+          }));
+        } else {
+          return [];
+        }
+      } else {
+        throw new Error("Search request failed!");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  },
+
+  //  Below code works as well
+  //  search(term) {
   //   const url = 'https://api.spotify.com/v1/search?type=track&q=';
   //   let accessToken = this.getAccessToken();
   //   let endPoint = `${url}${term}`;
   //   let header = {Authorization: `Bearer ${accessToken}`}
-  //   try {
-  //     const response = await fetch(endPoint, {headers: header});
-  //     if(response.ok){
-  //       const jsonResponse = await response.json();
-  //       if (jsonResponse.tracks.items) {
-  //         return jsonResponse.tracks.items.map(track => ({
-  //           name: track.name,
-  //           artist: track.artists[0].name,
-  //           album: track.album.name,
-  //           id: track.id,
-  //           uri: track.uri
-  //         }));
-  //       } else {
-  //         return [];
-  //       }
-  //     } else {
-  //       throw new Error("Search request failed!");
+
+  //   return (fetch(endPoint, {headers:header})).then(response => {
+  //     if(response.ok) {
+  //       return response.json();
   //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
+  //   }).then(jsonResponse =>{
+  //     if(jsonResponse.tracks.items) {
+  //       return jsonResponse.tracks.items.map(track =>({
+  //         name: track.name,
+  //         artist: track.artists[0].name,
+  //         album: track.album.name,
+  //         id: track.id,
+  //         uri: track.uri          
+  //       }));
+  //     } else {
+  //       return [];
+  //     }
+  //   })
   // },
-
-  //  Below code works as well
-   search(term) {
-    const url = 'https://api.spotify.com/v1/search?type=track&q=';
-    let accessToken = this.getAccessToken();
-    let endPoint = `${url}${term}`;
-    let header = {Authorization: `Bearer ${accessToken}`}
-
-    return (fetch(endPoint, {headers:header})).then(response => {
-      if(response.ok) {
-        return response.json();
-      }
-    }).then(jsonResponse =>{
-      if(jsonResponse.tracks.items) {
-        return jsonResponse.tracks.items.map(track =>({
-          name: track.name,
-          artist: track.artists[0].name,
-          album: track.album.name,
-          id: track.id,
-          uri: track.uri          
-        }));
-      } else {
-        return [];
-      }
-    })
-  },
 
   async savePlaylist(palylistName, trackURIs) {
     const accessToken = this.getAccessToken();
