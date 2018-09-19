@@ -1,5 +1,6 @@
 let userToken;
-const redirectURI = 'http://localhost:3000/';
+// const redirectURI = 'http://localhost:3000/';
+const redirectURI = 'jammming_qinghu.surge.sh';
 const clientID = 'ee7e6fc116014a429124843dd1efad98';
 
 const Spotify = {
@@ -24,7 +25,7 @@ const Spotify = {
 
   // async search(term) {
   //   const url = 'https://api.spotify.com/v1/search?type=track&q=';
-  //   let accessToken = Spotify.getAccessToken();
+  //   let accessToken = this.getAccessToken();
   //   let endPoint = `${url}${term}`;
   //   let header = {Authorization: `Bearer ${accessToken}`}
   //   try {
@@ -53,7 +54,7 @@ const Spotify = {
   //  Below code works as well
    search(term) {
     const url = 'https://api.spotify.com/v1/search?type=track&q=';
-    let accessToken = Spotify.getAccessToken();
+    let accessToken = this.getAccessToken();
     let endPoint = `${url}${term}`;
     let header = {Authorization: `Bearer ${accessToken}`}
 
@@ -77,7 +78,7 @@ const Spotify = {
   },
 
   async savePlaylist(palylistName, trackURIs) {
-    const accessToken = Spotify.getAccessToken();
+    const accessToken = this.getAccessToken();
     let header = {Authorization: `Bearer ${accessToken}`}
     // let userID;
     let playlistID;
