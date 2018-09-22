@@ -83,16 +83,12 @@ class App extends React.Component {
     })
   }
 
-  onPreviewStatusChange(status) {
-
-  }
-
   render() {
     return (
       <div>
         <h1>Ja<span className="highlight">mmm</span>ing</h1>
         <div className="App">
-          <SearchBar onSearch={this.search} onStatusChange={this.onPreviewStatusChange}/>
+          <SearchBar onSearch={this.search} />
           <div className="App-playlist">
             <SearchResults searchResults={this.state.searchResults} onAdd={this.addTrack} />
             <Playlist playlistName={this.state.playlistName}

@@ -1,6 +1,6 @@
 let userToken;
-const redirectURI = 'http://localhost:3000/';
-// const redirectURI = 'http://jammming_qinghu.surge.sh';
+// const redirectURI = 'http://localhost:3000/';
+const redirectURI = 'http://jammming_qinghu.surge.sh';
 const clientID = 'ee7e6fc116014a429124843dd1efad98';
 
 const Spotify = {
