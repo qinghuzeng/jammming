@@ -12,12 +12,6 @@ class App extends React.Component {
     this.state = {
       playlistName: 'New Playlist',
       playlistTracks: [],
-      // searchResults:[
-      //   {name: "Dahai2", artist: "ZYS21", album: "Dahai2", id: "11"},
-      //   {name: "Dahai2", artist: "ZYS22", album: "Dahai2", id: "22"},
-      //   {name: "Dahai2", artist: "ZYS23", album: "Dahai2", id: "32"},
-      //   {name: "Dahai2", artist: "ZYS24", album: "Dahai2", id: "41"}
-      // ]
       searchResults: []
     };
     this.addTrack = this.addTrack.bind(this);
@@ -31,10 +25,8 @@ class App extends React.Component {
     if (this.state.playlistTracks.find(savedTrack => savedTrack.id === track.id)) {
       return;
     } else {
-      const savedPlaylist = this.state.playlistTracks;
-      console.log(savedPlaylist);
+      const savedPlaylist = this.state.playlistTracks.slice();
       savedPlaylist.push(track);
-      console.log(savedPlaylist);
       this.setState({
         playlistTracks: savedPlaylist
       });
@@ -59,18 +51,25 @@ class App extends React.Component {
   }
 
   savePlaylist() {
+    if (this.state.playlistName.length <= 0) {
+      alert("No playlist name assigned!");
+      return;
+    }
+    if (this.state.playlistTracks.length <= 0) {
+      alert("No track was added!");
+      return;
+    }
     const trackURIs = this.state.playlistTracks.map(track =>{
       return track.uri;
     });
-    console.log(trackURIs);
-    if (this.state.playlistName === '') {
-      return;
-    }
-    Spotify.savePlaylist(this.state.playlistName, trackURIs);
-    this.setState({
-      playlistName: 'New Playlist',
-      playlistTracks: []
-    })
+    
+    Spotify.savePlaylist(this.state.playlistName, trackURIs).then(() => {
+        this.setState({
+          playlistName: 'New Playlist',
+          playlistTracks: []
+        })
+      }
+    ); 
   }
 
   search(term) {
@@ -78,30 +77,33 @@ class App extends React.Component {
       return;
     }
     Spotify.search(term).then(searchResults => {
-      console.log(searchResults);
       this.setState({
         searchResults: searchResults
       })
     })
   }
 
+  onPreviewStatusChange(status) {
+
+  }
+
   render() {
     return (
       <div>
         <h1>Ja<span className="highlight">mmm</span>ing</h1>
-          <div className="App">
-            <SearchBar onSearch={this.search}/>
-            <div className="App-playlist">
-              <SearchResults searchResults={this.state.searchResults} onAdd={this.addTrack} />
-              <Playlist playlistName={this.state.playlistName}
-               playlistTracks={this.state.playlistTracks}
-               onRemove={this.removeTrack}
-               onNameChange={this.updatePlaylistName}
-               onSave = {this.savePlaylist}
-              />
-            </div>
+        <div className="App">
+          <SearchBar onSearch={this.search} onStatusChange={this.onPreviewStatusChange}/>
+          <div className="App-playlist">
+            <SearchResults searchResults={this.state.searchResults} onAdd={this.addTrack} />
+            <Playlist playlistName={this.state.playlistName}
+              playlistTracks={this.state.playlistTracks}
+              onRemove={this.removeTrack}
+              onNameChange={this.updatePlaylistName}
+              onSave = {this.savePlaylist}
+            />
           </div>
         </div>
+      </div>
     );
   }
 }

@@ -7,6 +7,7 @@ class Track extends React.Component {
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
     this.renderAction = this.renderAction.bind(this);
+    this.showPreviewUrl = this.showPreviewUrl.bind(this);
   }
 
   renderAction() {
@@ -25,6 +26,21 @@ class Track extends React.Component {
     this.props.onRemove(this.props.track);
   }
 
+  showPreviewUrl() {
+    if(this.props.track.previewUrl === null) {
+      return;
+    }
+    if(this.props.isSearchResult) {
+      return (
+        <div>
+          <audio src={this.props.track.previewUrl} controls="controls">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      )
+    }
+  }
+
   render() {
     return (
       <div className="Track">
@@ -32,6 +48,7 @@ class Track extends React.Component {
           <h3>{this.props.track.name}</h3>
           <p>{this.props.track.artist}|{this.props.track.album}</p>
         </div>
+          {this.showPreviewUrl()}
           {this.renderAction()}
       </div>
     );
